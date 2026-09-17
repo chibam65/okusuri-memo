@@ -1,7 +1,7 @@
 /* Supabase の接続情報を設定するとクラウド同期が有効になります。 */
 const CLOUD_CONFIG = {
-  url: "", // 例: https://xxxx.supabase.co
-  anonKey: ""
+  url: "https://kmpmommasdmvccwdzzfa.supabase.co",
+  anonKey: "sb_publishable_x5qLjILuuixPkELz2UfNcw_VFUBIQmN"
 };
 
 window.CloudStore = (() => {
