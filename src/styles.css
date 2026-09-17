@@ -1,0 +1,46 @@
+:root { color-scheme: light; font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", sans-serif; color: #1e3029; background: #f6f5ef; }
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; }
+button, input { font: inherit; }
+button { cursor: pointer; }
+.app-shell { width: min(100%, 680px); margin: auto; padding: 42px 20px 36px; }
+.eyebrow, .section-label { margin: 0 0 7px; color: #5d786d; font-size: 12px; font-weight: 750; letter-spacing: .12em; }
+h1 { margin: 0; font-size: clamp(30px, 7vw, 42px); letter-spacing: -.05em; }
+h2 { margin: 0; font-size: 18px; }
+.date-label { margin: 8px 0 28px; color: #64726c; }
+.summary { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 21px; border-radius: 22px; color: #fff; background: #315d4f; box-shadow: 0 10px 24px #315d4f25; }
+.summary-text { margin: 0; font-size: 22px; font-weight: 700; }
+.progress-ring { display: grid; place-items: center; flex: 0 0 65px; width: 65px; height: 65px; border: 6px solid #91c6af; border-radius: 50%; font-weight: 750; }
+.section-heading { display: flex; align-items: baseline; justify-content: space-between; margin: 34px 0 13px; }
+.section-heading.compact { margin: 0 0 8px; }
+.text-button { padding: 0; border: 0; color: #315d4f; background: none; font-size: 14px; font-weight: 700; }
+.medicine-list { display: grid; gap: 10px; }
+.medicine-card { display: grid; grid-template-columns: 58px 1fr auto auto 28px; align-items: center; gap: 10px; padding: 14px 13px; border: 1px solid #e2e3dc; border-radius: 17px; background: #fff; }
+.medicine-card.taken { background: #edf6f1; border-color: #bad8c7; }
+.time { font-variant-numeric: tabular-nums; font-weight: 750; color: #315d4f; }
+.medicine-details h3 { margin: 0; font-size: 16px; }
+.medicine-details p { margin: 3px 0 0; color: #728078; font-size: 13px; }
+.check-button { min-width: 74px; padding: 9px 11px; border: 1px solid #315d4f; border-radius: 10px; color: #315d4f; background: #fff; font-size: 13px; font-weight: 700; }
+.management-mode .check-button { display: none; }
+.edit-button { padding: 7px 5px; border: 0; color: #60756b; background: transparent; font-size: 12px; }
+.taken .check-button { color: #fff; background: #315d4f; }
+.delete-button { width: 28px; height: 28px; border: 0; border-radius: 50%; color: #89968f; background: transparent; font-size: 22px; line-height: 1; }
+.delete-button:hover { background: #f3f3ee; }
+.add-section { margin-top: 32px; padding: 21px; border-radius: 20px; background: #e9ece2; }
+.add-section h2 { margin-bottom: 17px; }
+form { display: grid; gap: 13px; }
+label { display: grid; gap: 6px; color: #42554c; font-size: 13px; font-weight: 650; }
+input { width: 100%; padding: 11px 12px; border: 1px solid #cbd2c9; border-radius: 10px; color: #1e3029; background: #fff; }
+input:focus { outline: 3px solid #a5d3bd; border-color: #315d4f; }
+.primary-button { margin-top: 4px; padding: 12px; border: 0; border-radius: 11px; color: #fff; background: #315d4f; font-weight: 750; }
+.privacy-note { margin: 25px 4px 0; color: #718078; font-size: 12px; line-height: 1.6; }
+.cloud-section { margin-top: 30px; padding: 20px; border: 1px solid #dfe5dd; border-radius: 20px; background: #fff; }
+.cloud-section:has(#authForm[hidden]) { padding: 14px 18px; }
+.cloud-section > p { margin: 0 0 15px; color: #68766f; font-size: 13px; }
+.cloud-status { color: #718078; font-size: 12px; }
+.auth-form { gap: 10px; }
+.auth-actions { display: flex; gap: 10px; margin-top: 3px; }
+.auth-actions .primary-button, .secondary-button { flex: 1; margin: 0; }
+.secondary-button { padding: 11px; border: 1px solid #315d4f; border-radius: 11px; color: #315d4f; background: #fff; font-weight: 750; }
+.empty-state { margin: 0; padding: 24px 10px; color: #718078; text-align: center; }
+@media (max-width: 420px) { .medicine-card { grid-template-columns: 52px 1fr 28px; } .check-button { grid-column: 2; grid-row: 2; width: fit-content; } .edit-button { grid-column: 2; grid-row: 2; justify-self: end; margin-right: 55px; } .delete-button { grid-column: 3; grid-row: 1; } }
