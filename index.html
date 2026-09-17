@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#315d4f" />
+    <title>おくすりメモ</title>
+    <link rel="stylesheet" href="src/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header>
+        <p class="eyebrow">MEDICINE CHECK</p>
+        <h1>おくすりメモ</h1>
+        <p id="todayLabel" class="date-label"></p>
+      </header>
+
+      <section class="summary" aria-labelledby="summaryTitle">
+        <div>
+          <p id="summaryTitle" class="section-label">今日の服用</p>
+          <p id="summaryText" class="summary-text"></p>
+        </div>
+        <div class="progress-ring" aria-hidden="true"><span id="progressValue"></span></div>
+      </section>
+
+      <section class="cloud-section" aria-labelledby="cloudTitle">
+        <div class="section-heading compact"><h2 id="cloudTitle">端末間で同期</h2><span id="cloudStatus" class="cloud-status">ローカル保存中</span></div>
+        <p id="cloudMessage">ログインすると、スマホとPCで同じ記録を使えます。</p>
+        <form id="authForm" class="auth-form">
+          <label>メールアドレス<input id="authEmail" type="email" required placeholder="you@example.com" /></label>
+          <label>パスワード<input id="authPassword" type="password" minlength="8" required placeholder="8文字以上" /></label>
+          <div class="auth-actions"><button class="primary-button" type="submit">ログイン</button><button id="signUpButton" class="secondary-button" type="button">新規登録</button></div>
+        </form>
+        <button id="signOutButton" class="text-button" type="button" hidden>ログアウト</button>
+      </section>
+
+      <section aria-labelledby="scheduleTitle">
+        <div class="section-heading">
+          <h2 id="scheduleTitle">今日の予定</h2>
+          <button id="showAllButton" class="text-button" type="button">すべての薬を管理</button>
+          <button id="notifyButton" class="text-button" type="button">通知をオンにする</button>
+        </div>
+        <div id="medicineList" class="medicine-list"></div>
+      </section>
+
+      <section class="history-section" aria-labelledby="historyTitle">
+        <div class="section-heading compact"><h2 id="historyTitle">過去の記録</h2><input id="historyDate" type="date" /></div>
+        <p id="historyText" class="history-text"></p>
+      </section>
+
+      <section class="add-section" aria-labelledby="addTitle">
+        <h2 id="addTitle">薬を追加</h2>
+        <form id="medicineForm">
+          <label>薬の名前<input id="medicineName" maxlength="40" required placeholder="例：〇〇錠" /></label>
+          <label>飲み方<select id="medicineFrequency"><option value="daily">毎日</option><option value="weekly">週1回</option><option value="as-needed">頓服（必要な時）</option></select></label>
+          <label id="weekdayField" hidden>曜日<select id="medicineWeekday"><option value="1">月曜日</option><option value="2">火曜日</option><option value="3">水曜日</option><option value="4">木曜日</option><option value="5">金曜日</option><option value="6">土曜日</option><option value="0">日曜日</option></select></label>
+          <label id="timeField">飲む時間<input id="medicineTime" type="time" required /></label>
+          <label>メモ（任意）<input id="medicineNote" maxlength="60" placeholder="例：食後、1錠" /></label>
+          <button class="primary-button" type="submit">予定に追加する</button>
+        </form>
+      </section>
+
+      <p class="privacy-note">記録はこのブラウザにのみ保存されます。服用方法は処方・薬剤師の指示に従ってください。</p>
+    </main>
+    <template id="medicineTemplate">
+      <article class="medicine-card">
+        <div class="time"></div>
+        <div class="medicine-details"><h3></h3><p></p></div>
+        <button class="check-button" type="button"></button>
+        <button class="edit-button" type="button">編集</button>
+        <button class="delete-button" type="button" aria-label="この薬を削除する">×</button>
+      </article>
+    </template>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="src/cloud.js"></script>
+    <script src="src/app.js"></script>
+  </body>
+</html>
