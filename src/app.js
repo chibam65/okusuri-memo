@@ -51,6 +51,11 @@ async function useCloudSession() {
 }
 function isTaken(id) { return Boolean(records[dayKey()]?.[id]); }
 function isScheduledToday(medicine) { return medicine.frequency !== "weekly" || Number(medicine.weekday) === new Date().getDay(); }
+function renderHistory(date = dayKey()) {
+  const dayRecords = records[date] || {};
+  const taken = medicines.filter((medicine) => dayRecords[medicine.id]);
+  document.querySelector("#historyText").textContent = taken.length ? `${taken.length}件：${taken.map((medicine) => medicine.name).join("、")}` : "この日の服用記録はありません";
+}
 function updateSummary() {
   const todaysMedicines = medicines.filter(isScheduledToday);
   const taken = todaysMedicines.filter((medicine) => isTaken(medicine.id)).length;
@@ -138,8 +143,9 @@ function checkReminders() {
   medicines.filter((medicine) => medicine.time === current && !isTaken(medicine.id)).forEach((medicine) => new Notification("おくすりメモ", { body: `${medicine.name} の時間です。服用後に記録してください。` }));
 }
 document.querySelector("#todayLabel").textContent = new Intl.DateTimeFormat("ja-JP", { month: "long", day: "numeric", weekday: "short" }).format(new Date());
+const historyDate = document.querySelector("#historyDate"); historyDate.value = dayKey(); historyDate.addEventListener("change", () => renderHistory(historyDate.value));
 document.querySelector("#showAllButton").addEventListener("click", () => { showAllMedicines = !showAllMedicines; document.querySelector("#showAllButton").textContent = showAllMedicines ? "今日の予定に戻す" : "すべての薬を管理"; document.querySelector("#scheduleTitle").textContent = showAllMedicines ? "登録中の薬" : "今日の予定"; render(); });
-updateNotifyButton(); render(); checkReminders(); setInterval(checkReminders, 60000);
+updateNotifyButton(); render(); renderHistory(); checkReminders(); setInterval(checkReminders, 60000);
 document.querySelector("#authForm").addEventListener("submit", async (event) => { event.preventDefault(); if (!window.CloudStore.enabled) return setCloudMessage("先に src/cloud.js の接続情報を設定してください。"); const email = document.querySelector("#authEmail").value; const password = document.querySelector("#authPassword").value; const result = await window.CloudStore.signIn(email, password); if (result.error) return setCloudMessage(result.error.message); await useCloudSession(); });
 document.querySelector("#signUpButton").addEventListener("click", async () => { if (!window.CloudStore.enabled) return setCloudMessage("先に src/cloud.js の接続情報を設定してください。"); const email = document.querySelector("#authEmail").value; const password = document.querySelector("#authPassword").value; const result = await window.CloudStore.signUp(email, password); setCloudMessage(result.error ? result.error.message : "確認メールを送信しました。メールのリンクを開いてからログインしてください。"); });
 document.querySelector("#signOutButton").addEventListener("click", async () => { await window.CloudStore.signOut(); cloudUser = null; document.querySelector("#authForm").hidden = false; document.querySelector("#signOutButton").hidden = true; document.querySelector("#cloudStatus").textContent = "ローカル保存中"; setCloudMessage("ログアウトしました。端末内保存に戻りました。"); });
