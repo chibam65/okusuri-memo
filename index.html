@@ -40,6 +40,13 @@
           <button id="showAllButton" class="text-button" type="button">すべての薬を管理</button>
           <button id="notifyButton" class="text-button" type="button">通知をオンにする</button>
         </div>
+        <button id="temporaryButton" class="secondary-button temporary-button" type="button">＋ 臨時服用を記録</button>
+        <form id="temporaryForm" class="temporary-form" hidden>
+          <label>薬の名前<input id="temporaryName" maxlength="40" required placeholder="例：痛み止め" /></label>
+          <label>服用時刻<input id="temporaryTime" type="time" required /></label>
+          <label>メモ（任意）<input id="temporaryNote" maxlength="60" /></label>
+          <div class="auth-actions"><button class="primary-button" type="submit">今日の実績に追加</button><button id="cancelTemporary" class="secondary-button" type="button">キャンセル</button></div>
+        </form>
         <div id="medicineList" class="medicine-list"></div>
       </section>
 
@@ -48,13 +55,15 @@
         <p id="historyText" class="history-text"></p>
       </section>
 
-      <section class="add-section" aria-labelledby="addTitle">
+      <section id="addSection" class="add-section" aria-labelledby="addTitle" hidden>
         <h2 id="addTitle">薬を追加</h2>
         <form id="medicineForm">
           <label>薬の名前<input id="medicineName" maxlength="40" required placeholder="例：〇〇錠" /></label>
           <label>飲み方<select id="medicineFrequency"><option value="daily">毎日</option><option value="weekly">週1回</option><option value="as-needed">頓服（必要な時）</option></select></label>
           <label id="weekdayField" hidden>曜日<select id="medicineWeekday"><option value="1">月曜日</option><option value="2">火曜日</option><option value="3">水曜日</option><option value="4">木曜日</option><option value="5">金曜日</option><option value="6">土曜日</option><option value="0">日曜日</option></select></label>
           <label id="timeField">飲む時間<input id="medicineTime" type="time" required /></label>
+          <label>服用開始日（任意）<input id="medicineStartDate" type="date" /></label>
+          <label>服用終了日（任意）<input id="medicineEndDate" type="date" /></label>
           <label>メモ（任意）<input id="medicineNote" maxlength="60" placeholder="例：食後、1錠" /></label>
           <button class="primary-button" type="submit">予定に追加する</button>
         </form>
@@ -68,6 +77,7 @@
         <div class="medicine-details"><h3></h3><p></p></div>
         <button class="check-button" type="button"></button>
         <button class="edit-button" type="button">編集</button>
+        <button class="lifecycle-button" type="button"></button>
         <button class="delete-button" type="button" aria-label="この薬を削除する">×</button>
       </article>
     </template>

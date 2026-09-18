@@ -15,6 +15,7 @@ function readStorage(key, fallback) {
 }
 let medicines = readStorage(storageKey, defaultMedicines);
 let records = readStorage(recordKey, {});
+medicines = medicines.map((medicine) => ({ status: "active", ...medicine }));
 let cloudUser = null;
 let editingId = null;
 let showAllMedicines = false;
@@ -23,6 +24,8 @@ const timeInput = document.querySelector("#medicineTime");
 const weekdayInput = document.querySelector("#medicineWeekday");
 const weekdayField = document.querySelector("#weekdayField");
 const timeField = document.querySelector("#timeField");
+const startDateInput = document.querySelector("#medicineStartDate");
+const endDateInput = document.querySelector("#medicineEndDate");
 
 function dayKey() { return new Date().toLocaleDateString("sv-SE"); }
 function save() {
@@ -64,17 +67,22 @@ async function useCloudSession() {
   document.querySelector("#authForm").hidden = true; document.querySelector("#signOutButton").hidden = false; document.querySelector("#cloudStatus").textContent = "クラウド同期中"; setCloudMessage(`${cloudUser.email} で同期しています。`);
 }
 function isTaken(id) { return Boolean(records[dayKey()]?.[id]); }
-function isScheduledToday(medicine) { return medicine.frequency !== "weekly" || Number(medicine.weekday) === new Date().getDay(); }
+function isActive(medicine) { return medicine.status !== "ended"; }
+function isScheduledToday(medicine) { return isActive(medicine) && (medicine.frequency !== "weekly" || Number(medicine.weekday) === new Date().getDay()); }
+function temporaryRecords() { return records[dayKey()]?._temporary || []; }
 function renderHistory(date = dayKey()) {
   const dayRecords = records[date] || {};
   const taken = medicines.filter((medicine) => dayRecords[medicine.id]);
-  document.querySelector("#historyText").textContent = taken.length ? `${taken.length}件：${taken.map((medicine) => medicine.name).join("、")}` : "この日の服用記録はありません";
+  const names = [...taken.map((medicine) => medicine.name), ...(dayRecords._temporary || []).map((item) => item.name)];
+  document.querySelector("#historyText").textContent = names.length ? `${names.length}件：${names.join("、")}` : "この日の服用記録はありません";
 }
 function updateSummary() {
   const todaysMedicines = medicines.filter(isScheduledToday);
-  const taken = todaysMedicines.filter((medicine) => isTaken(medicine.id)).length;
-  document.querySelector("#summaryText").textContent = todaysMedicines.length ? `${taken} / ${todaysMedicines.length} 回 済み` : "今日の予定はありません";
-  document.querySelector("#progressValue").textContent = todaysMedicines.length ? `${Math.round(taken / todaysMedicines.length * 100)}%` : "–";
+  const temporary = temporaryRecords();
+  const taken = todaysMedicines.filter((medicine) => isTaken(medicine.id)).length + temporary.length;
+  const total = todaysMedicines.length + temporary.length;
+  document.querySelector("#summaryText").textContent = total ? `${taken} / ${total} 回 済み` : "今日の予定はありません";
+  document.querySelector("#progressValue").textContent = total ? `${Math.round(taken / total * 100)}%` : "–";
 }
 function render() {
   list.innerHTML = "";
@@ -85,6 +93,7 @@ function render() {
     const taken = isTaken(medicine.id);
     card.classList.toggle("taken", taken);
     card.classList.toggle("management-mode", showAllMedicines);
+    card.classList.toggle("ended", medicine.status === "ended");
     card.querySelector(".time").textContent = medicine.frequency === "as-needed" ? "頓服" : medicine.frequency === "weekly" ? `毎週${["日", "月", "火", "水", "木", "金", "土"][medicine.weekday]} ${medicine.time}` : medicine.time;
     card.querySelector("h3").textContent = medicine.name;
     card.querySelector("p").textContent = medicine.note || "メモなし";
@@ -92,7 +101,22 @@ function render() {
     checkButton.textContent = taken ? "服用済み ✓" : "服用した";
     checkButton.addEventListener("click", () => toggleTaken(medicine.id));
     card.querySelector(".edit-button").addEventListener("click", () => startEditing(medicine));
+    const lifecycleButton = card.querySelector(".lifecycle-button");
+    lifecycleButton.textContent = medicine.status === "ended" ? "服用を再開" : "服用終了";
+    lifecycleButton.addEventListener("click", () => toggleLifecycle(medicine.id));
     card.querySelector(".delete-button").addEventListener("click", () => removeMedicine(medicine.id));
+    list.append(card);
+  });
+  if (!showAllMedicines) temporaryRecords().forEach((item) => {
+    const card = template.content.firstElementChild.cloneNode(true);
+    card.classList.add("taken", "temporary-card");
+    card.querySelector(".time").textContent = item.time;
+    card.querySelector("h3").textContent = item.name;
+    card.querySelector("p").textContent = item.note || "臨時服用";
+    card.querySelector(".check-button").textContent = "記録済み ✓";
+    card.querySelector(".edit-button").hidden = true;
+    card.querySelector(".lifecycle-button").hidden = true;
+    card.querySelector(".delete-button").addEventListener("click", () => { records[dayKey()]._temporary = temporaryRecords().filter((entry) => entry.id !== item.id); save(); render(); renderHistory(); });
     list.append(card);
   });
   updateSummary();
@@ -104,10 +128,18 @@ function startEditing(medicine) {
   weekdayInput.value = medicine.weekday ?? "1";
   frequencyInput.dispatchEvent(new Event("change"));
   document.querySelector("#medicineTime").value = medicine.time;
+  startDateInput.value = medicine.startDate || "";
+  endDateInput.value = medicine.endDate || "";
   document.querySelector("#medicineNote").value = medicine.note || "";
   document.querySelector(".add-section .primary-button").textContent = "変更を保存";
   document.querySelector("#medicineName").focus();
   document.querySelector(".add-section").scrollIntoView({ behavior: "smooth", block: "center" });
+}
+function toggleLifecycle(id) {
+  const medicine = medicines.find((item) => item.id === id); if (!medicine) return;
+  if (medicine.status === "ended") { medicine.status = "active"; medicine.endDate = ""; }
+  else { medicine.status = "ended"; medicine.endDate ||= dayKey(); }
+  save(); render();
 }
 function toggleTaken(id) {
   const today = dayKey(); records[today] ??= {};
@@ -127,11 +159,11 @@ form.addEventListener("submit", (event) => {
   const note = document.querySelector("#medicineNote").value.trim();
   if (editingId) {
     const medicine = medicines.find((item) => item.id === editingId);
-    if (medicine) Object.assign(medicine, { name, time, note, frequency, weekday });
+    if (medicine) Object.assign(medicine, { name, time, note, frequency, weekday, startDate: startDateInput.value, endDate: endDateInput.value });
     editingId = null;
     document.querySelector(".add-section .primary-button").textContent = "予定に追加する";
   } else {
-    medicines.push({ id: crypto.randomUUID(), name, time, note, frequency, weekday });
+    medicines.push({ id: crypto.randomUUID(), name, time, note, frequency, weekday, status: "active", startDate: startDateInput.value, endDate: endDateInput.value });
   }
   try { save(); } catch { return; }
   form.reset(); frequencyInput.dispatchEvent(new Event("change")); render();
@@ -143,6 +175,9 @@ frequencyInput.addEventListener("change", () => {
   timeInput.required = !asNeeded;
   weekdayField.hidden = !weekly;
 });
+document.querySelector("#temporaryButton").addEventListener("click", () => { const form = document.querySelector("#temporaryForm"); form.hidden = !form.hidden; if (!form.hidden) { document.querySelector("#temporaryTime").value = `${String(new Date().getHours()).padStart(2, "0")}:${String(new Date().getMinutes()).padStart(2, "0")}`; document.querySelector("#temporaryName").focus(); } });
+document.querySelector("#cancelTemporary").addEventListener("click", () => { document.querySelector("#temporaryForm").hidden = true; });
+document.querySelector("#temporaryForm").addEventListener("submit", (event) => { event.preventDefault(); const today = dayKey(); records[today] ??= {}; records[today]._temporary ??= []; records[today]._temporary.push({ id: crypto.randomUUID(), name: document.querySelector("#temporaryName").value.trim(), time: document.querySelector("#temporaryTime").value, note: document.querySelector("#temporaryNote").value.trim() }); save(); event.target.reset(); event.target.hidden = true; render(); renderHistory(); });
 function updateNotifyButton() {
   if (!("Notification" in window)) {
     notifyButton.hidden = true;
@@ -158,7 +193,7 @@ function checkReminders() {
 }
 document.querySelector("#todayLabel").textContent = new Intl.DateTimeFormat("ja-JP", { month: "long", day: "numeric", weekday: "short" }).format(new Date());
 const historyDate = document.querySelector("#historyDate"); historyDate.value = dayKey(); historyDate.addEventListener("change", () => renderHistory(historyDate.value));
-document.querySelector("#showAllButton").addEventListener("click", () => { showAllMedicines = !showAllMedicines; document.querySelector("#showAllButton").textContent = showAllMedicines ? "今日の予定に戻す" : "すべての薬を管理"; document.querySelector("#scheduleTitle").textContent = showAllMedicines ? "登録中の薬" : "今日の予定"; render(); });
+document.querySelector("#showAllButton").addEventListener("click", () => { showAllMedicines = !showAllMedicines; document.querySelector("#showAllButton").textContent = showAllMedicines ? "今日の予定に戻す" : "すべての薬を管理"; document.querySelector("#scheduleTitle").textContent = showAllMedicines ? "登録中の薬" : "今日の予定"; document.querySelector("#addSection").hidden = !showAllMedicines; document.querySelector("#temporaryButton").hidden = showAllMedicines; document.querySelector("#temporaryForm").hidden = true; render(); });
 updateNotifyButton(); render(); renderHistory(); checkReminders(); setInterval(checkReminders, 60000);
 document.querySelector("#authForm").addEventListener("submit", async (event) => { event.preventDefault(); if (!window.CloudStore.enabled) return setCloudMessage("登録失敗：Supabase接続情報が未設定です。"); const email = document.querySelector("#authEmail").value; const password = document.querySelector("#authPassword").value; setCloudMessage("ログイン処理中…"); const result = await window.CloudStore.signIn(email, password); if (result.error) return setCloudMessage(`ログイン失敗：${result.error.message}`); await useCloudSession(); });
 document.querySelector("#signUpButton").addEventListener("click", async () => { if (!window.CloudStore.enabled) return setCloudMessage("登録失敗：Supabase接続情報が未設定です。"); const email = document.querySelector("#authEmail").value; const password = document.querySelector("#authPassword").value; setCloudMessage("登録処理中…ボタンをもう一度押さずにお待ちください。"); const result = await window.CloudStore.signUp(email, password); setCloudMessage(result.error ? `登録失敗：${result.error.message}` : "登録完了：確認メールを送信しました。メールのリンクを開いてからログインしてください。"); });
