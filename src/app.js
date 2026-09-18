@@ -40,6 +40,12 @@ function save() {
   if (cloudUser && window.CloudStore.enabled) window.CloudStore.save({ medicines, records }).catch(() => setCloudMessage("同期に失敗しました。通信状態を確認してください。"));
 }
 function setCloudMessage(message) { document.querySelector("#cloudMessage").textContent = message; }
+async function syncNow() {
+  if (!cloudUser) return;
+  setCloudMessage("同期中…");
+  try { await useCloudSession(); setCloudMessage(`${cloudUser.email} で同期しました。`); }
+  catch (error) { setCloudMessage(`同期失敗：${error.message || "原因を確認できません"}`); }
+}
 async function useCloudSession() {
   if (!window.CloudStore.enabled) {
     document.querySelector("#authForm").hidden = true;
@@ -64,7 +70,7 @@ async function useCloudSession() {
     // 初回ログイン時は、このブラウザに残っている記録をクラウドへ移行する。
     await window.CloudStore.save({ medicines, records });
   }
-  document.querySelector("#authForm").hidden = true; document.querySelector("#signOutButton").hidden = false; document.querySelector("#cloudStatus").textContent = "クラウド同期中"; setCloudMessage(`${cloudUser.email} で同期しています。`);
+  document.querySelector("#authForm").hidden = true; document.querySelector("#signOutButton").hidden = false; document.querySelector("#syncButton").hidden = false; document.querySelector("#cloudStatus").textContent = "クラウド同期中"; setCloudMessage(`${cloudUser.email} で同期しています。`);
 }
 function isTaken(id) { return Boolean(records[dayKey()]?.[id]); }
 function isActive(medicine) { return medicine.status !== "ended"; }
@@ -197,5 +203,6 @@ document.querySelector("#showAllButton").addEventListener("click", () => { showA
 updateNotifyButton(); render(); renderHistory(); checkReminders(); setInterval(checkReminders, 60000);
 document.querySelector("#authForm").addEventListener("submit", async (event) => { event.preventDefault(); if (!window.CloudStore.enabled) return setCloudMessage("登録失敗：Supabase接続情報が未設定です。"); const email = document.querySelector("#authEmail").value; const password = document.querySelector("#authPassword").value; setCloudMessage("ログイン処理中…"); const result = await window.CloudStore.signIn(email, password); if (result.error) return setCloudMessage(`ログイン失敗：${result.error.message}`); await useCloudSession(); });
 document.querySelector("#signUpButton").addEventListener("click", async () => { if (!window.CloudStore.enabled) return setCloudMessage("登録失敗：Supabase接続情報が未設定です。"); const email = document.querySelector("#authEmail").value; const password = document.querySelector("#authPassword").value; setCloudMessage("登録処理中…ボタンをもう一度押さずにお待ちください。"); const result = await window.CloudStore.signUp(email, password); setCloudMessage(result.error ? `登録失敗：${result.error.message}` : "登録完了：確認メールを送信しました。メールのリンクを開いてからログインしてください。"); });
-document.querySelector("#signOutButton").addEventListener("click", async () => { await window.CloudStore.signOut(); cloudUser = null; document.querySelector("#authForm").hidden = false; document.querySelector("#signOutButton").hidden = true; document.querySelector("#cloudStatus").textContent = "ローカル保存中"; setCloudMessage("ログアウトしました。端末内保存に戻りました。"); });
+document.querySelector("#signOutButton").addEventListener("click", async () => { await window.CloudStore.signOut(); cloudUser = null; document.querySelector("#authForm").hidden = false; document.querySelector("#signOutButton").hidden = true; document.querySelector("#syncButton").hidden = true; document.querySelector("#cloudStatus").textContent = "ローカル保存中"; setCloudMessage("ログアウトしました。端末内保存に戻りました。"); });
+document.querySelector("#syncButton").addEventListener("click", syncNow);
 useCloudSession().catch(() => setCloudMessage("クラウド接続を確認できません。端末内保存を利用します。"));
