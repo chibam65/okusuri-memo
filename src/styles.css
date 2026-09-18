@@ -4,6 +4,7 @@
 body { margin: 0; min-width: 320px; }
 button, input { font: inherit; }
 button { cursor: pointer; }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid #1d6f55; outline-offset: 2px; }
 .app-shell { width: min(100%, 680px); margin: auto; padding: 42px 20px 36px; }
 .eyebrow, .section-label { margin: 0 0 7px; color: #5d786d; font-size: 12px; font-weight: 750; letter-spacing: .12em; }
 h1 { margin: 0; font-size: clamp(30px, 7vw, 42px); letter-spacing: -.05em; }
@@ -55,4 +56,24 @@ input:focus { outline: 3px solid #a5d3bd; border-color: #315d4f; }
 .auth-actions .primary-button, .secondary-button { flex: 1; margin: 0; }
 .secondary-button { padding: 11px; border: 1px solid #315d4f; border-radius: 11px; color: #315d4f; background: #fff; font-weight: 750; }
 .empty-state { margin: 0; padding: 24px 10px; color: #718078; text-align: center; }
-@media (max-width: 420px) { .medicine-card { grid-template-columns: 52px 1fr 28px; } .check-button { grid-column: 2; grid-row: 2; width: fit-content; } .edit-button, .lifecycle-button { grid-column: 2; grid-row: 2; justify-self: end; margin-right: 55px; } .delete-button { grid-column: 3; grid-row: 1; } }
+@media (max-width: 600px) {
+  .app-shell { padding: 28px 14px 30px; }
+  h1 { font-size: 36px; }
+  h2 { font-size: 20px; }
+  .date-label { margin-bottom: 22px; font-size: 17px; }
+  .summary { padding: 20px 18px; }
+  .summary-text { font-size: 25px; }
+  .progress-ring { flex-basis: 68px; width: 68px; height: 68px; }
+  .section-heading { flex-wrap: wrap; gap: 10px 16px; }
+  .section-heading .text-button { min-height: 44px; padding: 8px 0; font-size: 15px; }
+  .medicine-card { grid-template-columns: 58px 1fr 28px; gap: 9px; padding: 15px 12px; }
+  .medicine-details h3 { font-size: 17px; }
+  .medicine-details p { font-size: 14px; }
+  .check-button { min-height: 44px; font-size: 15px; }
+  .delete-button { min-width: 44px; min-height: 44px; }
+  label { font-size: 15px; }
+  input, select { min-height: 48px; font-size: 16px; }
+  .primary-button, .secondary-button { min-height: 48px; font-size: 16px; }
+  .cloud-section > p[aria-live], .history-text { font-size: 15px; line-height: 1.5; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; } }
