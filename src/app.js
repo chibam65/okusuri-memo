@@ -46,7 +46,13 @@ async function useCloudSession() {
   const session = await window.CloudStore.session(); cloudUser = session?.user ?? null;
   if (!cloudUser) return;
   const remote = await window.CloudStore.load();
-  if (remote) { medicines = remote.medicines ?? medicines; records = remote.records ?? records; localStorage.setItem(storageKey, JSON.stringify(medicines)); localStorage.setItem(recordKey, JSON.stringify(records)); render(); }
+  if (remote) {
+    medicines = remote.medicines ?? medicines; records = remote.records ?? records;
+    localStorage.setItem(storageKey, JSON.stringify(medicines)); localStorage.setItem(recordKey, JSON.stringify(records)); render();
+  } else {
+    // 初回ログイン時は、このブラウザに残っている記録をクラウドへ移行する。
+    await window.CloudStore.save({ medicines, records });
+  }
   document.querySelector("#authForm").hidden = true; document.querySelector("#signOutButton").hidden = false; document.querySelector("#cloudStatus").textContent = "クラウド同期中"; setCloudMessage(`${cloudUser.email} で同期しています。`);
 }
 function isTaken(id) { return Boolean(records[dayKey()]?.[id]); }
