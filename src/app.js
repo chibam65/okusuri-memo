@@ -46,6 +46,17 @@ async function syncNow() {
   try { await useCloudSession(); setCloudMessage(`${cloudUser.email} で同期しました。`); }
   catch (error) { setCloudMessage(`同期失敗：${error.message || "原因を確認できません"}`); }
 }
+async function refreshFromCloud() {
+  if (!cloudUser || !window.CloudStore.enabled) return;
+  const remote = await window.CloudStore.load();
+  if (!remote) return;
+  medicines = Array.isArray(remote.medicines) ? remote.medicines : [];
+  records = remote.records && typeof remote.records === "object" ? remote.records : {};
+  localStorage.setItem(storageKey, JSON.stringify(medicines));
+  localStorage.setItem(recordKey, JSON.stringify(records));
+  render();
+  renderHistory();
+}
 async function useCloudSession() {
   if (!window.CloudStore.enabled) {
     document.querySelector("#authForm").hidden = true;
@@ -202,6 +213,9 @@ document.querySelector("#todayLabel").textContent = new Intl.DateTimeFormat("ja-
 const historyDate = document.querySelector("#historyDate"); historyDate.value = dayKey(); historyDate.addEventListener("change", () => renderHistory(historyDate.value));
 document.querySelector("#showAllButton").addEventListener("click", () => { showAllMedicines = !showAllMedicines; document.querySelector("#showAllButton").textContent = showAllMedicines ? "今日の予定に戻す" : "すべての薬を管理"; document.querySelector("#scheduleTitle").textContent = showAllMedicines ? "登録中の薬" : "今日の予定"; document.querySelector("#addSection").hidden = !showAllMedicines; document.querySelector("#temporaryButton").hidden = showAllMedicines; document.querySelector("#temporaryForm").hidden = true; render(); });
 updateNotifyButton(); render(); renderHistory(); checkReminders(); setInterval(checkReminders, 60000);
+window.addEventListener("focus", () => refreshFromCloud().catch(() => {}));
+document.addEventListener("visibilitychange", () => { if (!document.hidden) refreshFromCloud().catch(() => {}); });
+setInterval(() => refreshFromCloud().catch(() => {}), 30000);
 document.querySelector("#authForm").addEventListener("submit", async (event) => { event.preventDefault(); if (!window.CloudStore.enabled) return setCloudMessage("登録失敗：Supabase接続情報が未設定です。"); const email = document.querySelector("#authEmail").value; const password = document.querySelector("#authPassword").value; setCloudMessage("ログイン処理中…"); const result = await window.CloudStore.signIn(email, password); if (result.error) return setCloudMessage(`ログイン失敗：${result.error.message}`); await useCloudSession(); });
 document.querySelector("#signUpButton").addEventListener("click", async () => { if (!window.CloudStore.enabled) return setCloudMessage("登録失敗：Supabase接続情報が未設定です。"); const email = document.querySelector("#authEmail").value; const password = document.querySelector("#authPassword").value; setCloudMessage("登録処理中…ボタンをもう一度押さずにお待ちください。"); const result = await window.CloudStore.signUp(email, password); setCloudMessage(result.error ? `登録失敗：${result.error.message}` : "登録完了：確認メールを送信しました。メールのリンクを開いてからログインしてください。"); });
 document.querySelector("#signOutButton").addEventListener("click", async () => { await window.CloudStore.signOut(); cloudUser = null; document.querySelector("#authForm").hidden = false; document.querySelector("#signOutButton").hidden = true; document.querySelector("#syncButton").hidden = true; document.querySelector("#cloudStatus").textContent = "ローカル保存中"; setCloudMessage("ログアウトしました。端末内保存に戻りました。"); });
