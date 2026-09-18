@@ -25,6 +25,8 @@ h2 { margin: 0; font-size: 18px; }
 .management-mode .check-button { display: none; }
 .edit-button { padding: 7px 5px; border: 0; color: #60756b; background: transparent; font-size: 12px; }
 .lifecycle-button { padding: 7px 5px; border: 0; color: #60756b; background: transparent; font-size: 12px; }
+.medicine-card:not(.management-mode) .edit-button,
+.medicine-card:not(.management-mode) .lifecycle-button { display: none; }
 .ended { opacity: .52; background: #f0f1ed; }
 .ended .edit-button { visibility: hidden; }
 .temporary-button { margin: 0 0 12px; width: 100%; }
