@@ -47,7 +47,15 @@ async function useCloudSession() {
   if (!cloudUser) return;
   const remote = await window.CloudStore.load();
   if (remote) {
-    medicines = remote.medicines ?? medicines; records = remote.records ?? records;
+    const remoteMedicines = Array.isArray(remote.medicines) ? remote.medicines : [];
+    const remoteIds = new Set(remoteMedicines.map((medicine) => medicine.id));
+    // 既存のクラウドデータを残しつつ、このブラウザで追加された薬も統合する。
+    medicines = [...remoteMedicines, ...medicines.filter((medicine) => !remoteIds.has(medicine.id))];
+    records = Object.entries({ ...(remote.records || {}), ...records }).reduce((merged, [date, dayRecords]) => {
+      merged[date] = { ...(remote.records?.[date] || {}), ...(records[date] || {}), ...dayRecords };
+      return merged;
+    }, {});
+    await window.CloudStore.save({ medicines, records });
     localStorage.setItem(storageKey, JSON.stringify(medicines)); localStorage.setItem(recordKey, JSON.stringify(records)); render();
   } else {
     // 初回ログイン時は、このブラウザに残っている記録をクラウドへ移行する。
