@@ -54,6 +54,9 @@ async function useCloudSession() {
   }
   const session = await window.CloudStore.session(); cloudUser = session?.user ?? null;
   if (!cloudUser) return;
+  document.querySelector("#authForm").hidden = true;
+  document.querySelector("#signOutButton").hidden = false;
+  document.querySelector("#syncButton").hidden = false;
   const remote = await window.CloudStore.load();
   if (remote) {
     const remoteMedicines = Array.isArray(remote.medicines) ? remote.medicines : [];
@@ -70,7 +73,7 @@ async function useCloudSession() {
     // 初回ログイン時は、このブラウザに残っている記録をクラウドへ移行する。
     await window.CloudStore.save({ medicines, records });
   }
-  document.querySelector("#authForm").hidden = true; document.querySelector("#signOutButton").hidden = false; document.querySelector("#syncButton").hidden = false; document.querySelector("#cloudStatus").textContent = "クラウド同期中"; setCloudMessage(`${cloudUser.email} で同期しています。`);
+  document.querySelector("#cloudStatus").textContent = "クラウド同期中"; setCloudMessage(`${cloudUser.email} で同期しています。`);
 }
 function isTaken(id) { return Boolean(records[dayKey()]?.[id]); }
 function isActive(medicine) { return medicine.status !== "ended"; }
