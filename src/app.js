@@ -59,16 +59,14 @@ async function useCloudSession() {
   document.querySelector("#syncButton").hidden = false;
   const remote = await window.CloudStore.load();
   if (remote) {
-    const remoteMedicines = Array.isArray(remote.medicines) ? remote.medicines : [];
-    const remoteIds = new Set(remoteMedicines.map((medicine) => medicine.id));
-    // 既存のクラウドデータを残しつつ、このブラウザで追加された薬も統合する。
-    medicines = [...remoteMedicines, ...medicines.filter((medicine) => !remoteIds.has(medicine.id))];
-    records = Object.entries({ ...(remote.records || {}), ...records }).reduce((merged, [date, dayRecords]) => {
-      merged[date] = { ...(remote.records?.[date] || {}), ...(records[date] || {}), ...dayRecords };
-      return merged;
-    }, {});
-    await window.CloudStore.save({ medicines, records });
-    localStorage.setItem(storageKey, JSON.stringify(medicines)); localStorage.setItem(recordKey, JSON.stringify(records)); render();
+    // ログイン後はクラウドを正とし、このブラウザに残った古いローカル状態で
+    // クラウドを上書きしない。これにより端末ごとの表示差を防ぐ。
+    medicines = Array.isArray(remote.medicines) ? remote.medicines : [];
+    records = remote.records && typeof remote.records === "object" ? remote.records : {};
+    localStorage.setItem(storageKey, JSON.stringify(medicines));
+    localStorage.setItem(recordKey, JSON.stringify(records));
+    render();
+    renderHistory();
   } else {
     // 初回ログイン時は、このブラウザに残っている記録をクラウドへ移行する。
     await window.CloudStore.save({ medicines, records });
