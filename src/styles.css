@@ -20,7 +20,8 @@ h2 { margin: 0; font-size: 18px; }
 .medicine-card { display: grid; grid-template-columns: 58px 1fr auto auto 28px; align-items: center; gap: 10px; padding: 14px 13px; border: 1px solid #e2e3dc; border-radius: 17px; background: #fff; }
 .medicine-card.taken { background: #edf6f1; border-color: #bad8c7; }
 .time { font-variant-numeric: tabular-nums; font-weight: 750; color: #315d4f; }
-.medicine-details h3 { margin: 0; font-size: 16px; }
+.medicine-details { min-width: 0; }
+.medicine-details h3 { margin: 0; font-size: 16px; overflow-wrap: anywhere; }
 .medicine-details p { margin: 3px 0 0; color: #728078; font-size: 13px; }
 .check-button { min-width: 74px; padding: 9px 11px; border: 1px solid #315d4f; border-radius: 10px; color: #315d4f; background: #fff; font-size: 13px; font-weight: 700; }
 .management-mode .check-button { display: none; }
@@ -66,10 +67,10 @@ input:focus { outline: 3px solid #a5d3bd; border-color: #315d4f; }
   .progress-ring { flex-basis: 68px; width: 68px; height: 68px; }
   .section-heading { flex-wrap: wrap; gap: 10px 16px; }
   .section-heading .text-button { min-height: 44px; padding: 8px 0; font-size: 15px; }
-  .medicine-card { grid-template-columns: 58px 1fr 28px; gap: 9px; padding: 15px 12px; }
+  .medicine-card { grid-template-columns: 58px minmax(0, 1fr) 44px; gap: 9px; padding: 15px 12px; overflow: hidden; }
   .medicine-details h3 { font-size: 17px; }
   .medicine-details p { font-size: 14px; }
-  .check-button { min-height: 44px; font-size: 15px; }
+  .check-button { min-height: 44px; max-width: 100%; font-size: 15px; justify-self: start; }
   .delete-button { min-width: 44px; min-height: 44px; }
   label { font-size: 15px; }
   input, select { min-height: 48px; font-size: 16px; }
