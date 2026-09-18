@@ -116,7 +116,7 @@ function render() {
     card.querySelector(".check-button").textContent = "記録済み ✓";
     card.querySelector(".edit-button").hidden = true;
     card.querySelector(".lifecycle-button").hidden = true;
-    card.querySelector(".delete-button").addEventListener("click", () => { records[dayKey()]._temporary = temporaryRecords().filter((entry) => entry.id !== item.id); save(); render(); renderHistory(); });
+    card.querySelector(".delete-button").addEventListener("click", () => { if (!confirm("この臨時服用の記録を削除しますか？")) return; records[dayKey()]._temporary = temporaryRecords().filter((entry) => entry.id !== item.id); save(); render(); renderHistory(); });
     list.append(card);
   });
   updateSummary();

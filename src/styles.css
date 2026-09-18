@@ -31,7 +31,7 @@ h2 { margin: 0; font-size: 18px; }
 .ended { opacity: .52; background: #f0f1ed; }
 .ended .edit-button { visibility: hidden; }
 .temporary-button { margin: 0 0 12px; width: 100%; }
-.temporary-form { margin: 0 0 15px; padding: 14px; border-radius: 14px; background: #edf2ec; }
+.temporary-form { width: 100%; max-width: 100%; margin: 0 0 15px; padding: 14px; border-radius: 14px; background: #edf2ec; overflow: hidden; }
 .taken .check-button { color: #fff; background: #315d4f; }
 .delete-button { width: 28px; height: 28px; border: 0; border-radius: 50%; color: #89968f; background: transparent; font-size: 22px; line-height: 1; }
 .delete-button:hover { background: #f3f3ee; }
@@ -75,5 +75,7 @@ input:focus { outline: 3px solid #a5d3bd; border-color: #315d4f; }
   input, select { min-height: 48px; font-size: 16px; }
   .primary-button, .secondary-button { min-height: 48px; font-size: 16px; }
   .cloud-section > p[aria-live], .history-text { font-size: 15px; line-height: 1.5; }
+  .temporary-form .auth-actions { flex-wrap: wrap; }
+  .temporary-form .auth-actions > button { min-width: 0; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; } }
